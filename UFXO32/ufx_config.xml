@@ -1,0 +1,58 @@
+<ufx_config>
+
+  <operator_no>817</operator_no><!--操作员-->
+  <password>88888888</password><!--密码-->
+  <authorization_id>187540A387373696B3EA7B0BDC34C723</authorization_id><!--ufx开发者授权编码-->
+
+  <account_code>6016</account_code>
+  <asset_no>601600</asset_no>
+  <combi_no>6016000</combi_no>
+  <cust_id>180000000158</cust_id>
+  <pbuid>23245</pbuid>
+  
+  
+  <t2sdk>
+    <license_file>D:\DEV\ZGCLJY-HSDZ-UFX-0000_3rd.dat</license_file><!--许可证文件-->
+    <servers>61.142.2.100:9085</servers><!--UFX服务器地址-->
+  </t2sdk>
+  
+  <safe>
+    <cert_file>D:\DEV\gxzqclient.pfx</cert_file>
+    <cert_pwd>client0833</cert_pwd>
+    <safe_level>ssl</safe_level>
+  </safe>
+
+  <mc>
+    <client_name>xuxp</client_name><!--如果需要消息中心的订阅发布功能，这个配置项必须配置-->
+  </mc>
+  <subcribe>
+    <biz_name>xuxp</biz_name> <!--业务名字-->
+    <topic_name>ufx_topic</topic_name><!--主题名字-->
+    <is_rebulid>false</is_rebulid><!--是否需要补缺-->
+    <is_replace>false</is_replace><!--是否覆盖以前的订阅，不覆盖就是追加-->
+    <send_interval>0</send_interval><!--发送间隔,单位是秒-->
+    <filter_list><!--过滤字段-->
+      <filter>
+        <name>operator_no</name>
+        <value>817</value>
+      </filter>
+      <filter>
+        <name>msgtype</name>
+        <value></value>
+      </filter>
+      <filter>
+        <name>market_no</name>
+        <value></value>
+      </filter>
+      <!--<filter>
+        <name>msgtype</name>
+        <value>a</value>
+      </filter>
+      <filter>
+        <name>market_no</name>
+        <value>1</value>
+      </filter>-->
+    </filter_list>
+  </subcribe>
+  
+</ufx_config>
