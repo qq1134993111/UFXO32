@@ -37,26 +37,9 @@ public:
 		return true;
 	}
 
-	template <typename T>
-	inline typename boost::enable_if_c<boost::is_member_pointer<T>::value || boost::is_reference<T>::value, boost::optional<T>>::type
-		Get(const std::string& symbol_name) const
-	{
-		try
-		{
-			return lib_.get<T>(symbol_name);
-		}
-		catch (std::exception& e)
-		{
-
-		}
-
-		return {};
-	}
-
 
 	template <typename T>
-	inline typename boost::disable_if_c<boost::is_member_pointer<T>::value || boost::is_reference<T>::value, boost::optional<std::reference_wrapper<T>>>::type
-		Get(const std::string& symbol_name) const
+	boost::optional<std::reference_wrapper<T>> Get(const std::string& symbol_name) const
 	{
 		try
 		{
@@ -89,6 +72,17 @@ public:
 	{
 		lib_.unload();
 	}
+
+	bool IsLoad()
+	{
+		return lib_.is_loaded();
+	}
+
+	bool Has(const std::string& symbol_name)
+	{
+		return lib_.has(symbol_name);
+	}
+
 
 	const boost::dll::shared_library& GetSharedLibrary()
 	{
