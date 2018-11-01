@@ -38,12 +38,28 @@ public:
 	}
 
 
+	//template <typename T>
+	//boost::optional<std::reference_wrapper<T>> Get(const std::string& symbol_name) const
+	//{
+	//	try
+	//	{
+	//		return boost::optional<std::reference_wrapper<T>>{ lib_.get<T>(symbol_name) };
+	//	}
+	//	catch (std::exception& e)
+	//	{
+
+	//	}
+
+	//	return {};
+	//}
+
 	template <typename T>
-	boost::optional<std::reference_wrapper<T>> Get(const std::string& symbol_name) const
+	boost::optional<T&> Get(const std::string& symbol_name) const
 	{
 		try
 		{
-			return boost::optional<std::reference_wrapper<T>>{ lib_.get<T>(symbol_name) };
+			//return boost::optional<T&>{ lib_.get<T>(symbol_name) };
+			return  lib_.get<T>(symbol_name);
 		}
 		catch (std::exception& e)
 		{
@@ -54,11 +70,10 @@ public:
 	}
 
 
-
 	template<typename FUNC>
 	FUNC GetFunction(const std::string& function_name)
 	{
-		auto op_func = Get<function_traits<FUNC>::function_type>(function_name);
+		auto op_func = Get<typename function_traits<FUNC>::function_type>(function_name);
 
 		if (op_func)
 		{
