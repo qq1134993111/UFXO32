@@ -9,9 +9,9 @@ class SharedLibraryLoader
 {
 public:
 	SharedLibraryLoader() {}
-	SharedLibraryLoader(const boost::filesystem::path& lib_full_path)
+	SharedLibraryLoader(const boost::filesystem::path& lib_full_path, boost::dll::load_mode::type mode = boost::dll::load_mode::default_mode)
 	{
-		Load(lib_full_path);
+		Load(lib_full_path, mode);
 	}
 	~SharedLibraryLoader()
 	{
@@ -23,11 +23,11 @@ public:
 	SharedLibraryLoader& operator=(const SharedLibraryLoader& o) = delete;
 	SharedLibraryLoader& operator=(SharedLibraryLoader&& o) = delete;
 
-	bool Load(const boost::filesystem::path& lib_full_path)
+	bool Load(const boost::filesystem::path& lib_full_path, boost::dll::load_mode::type mode = boost::dll::load_mode::default_mode)
 	{
 		try
 		{
-			lib_.load(lib_full_path);
+			lib_.load(lib_full_path, mode);
 		}
 		catch (std::exception& e)
 		{
