@@ -98,6 +98,17 @@ public:
 		return lib_.has(symbol_name);
 	}
 
+	boost::filesystem::path location()
+	{
+		try
+		{
+			lib_.location();
+		}
+		catch (...)
+		{
+		}
+		return {};
+	}
 
 	const boost::dll::shared_library& GetSharedLibrary()
 	{
