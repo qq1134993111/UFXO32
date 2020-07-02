@@ -97,27 +97,7 @@ public:
     template<class Rep, class Period, typename Function>
     std::weak_ptr<boost::asio::steady_timer> AddTimer(std::chrono::duration<Rep, Period>  duration, Function&& function)
     {
-        //duration example std::chrono::milliseconds(1000);
-
-        auto timer = std::make_shared<boost::asio::steady_timer>(ios_, duration);
-
-        auto recursive_func = std::make_shared<std::unique_ptr<std::function<void(const boost::system::error_code& ec)> >>();
-
-        *recursive_func = std::make_unique<std::function<void(const boost::system::error_code& ec)>>(
-            [this, recursive_func, duration, function = std::forward<Function>(function), timer](const boost::system::error_code& ec)
-        {
-            if (ec)return;
-
-            if (function())
-            {
-                timer->expires_from_now(duration);
-                timer->async_wait(strand_.wrap(**recursive_func));
-            }
-        });
-
-        timer->async_wait(strand_.wrap(**recursive_func));
-
-        return  timer;
+        return SetTimer(duration, std::move(function), nullptr);
     }
 
     template<class Rep, class Period, class F, class... Args>
@@ -151,28 +131,11 @@ public:
         DispatchWithoutStrand(std::move(func));
     }
 
+
     template<class Rep, class Period, typename Function>
     std::weak_ptr<boost::asio::steady_timer> AddTimerWithoutStrand(std::chrono::duration<Rep, Period> duration, Function&& function)
     {
-        auto timer = std::make_shared<boost::asio::steady_timer>(ios_, duration);
-
-        auto recursive_func = std::make_shared<std::unique_ptr<std::function<void(const boost::system::error_code& ec)> >>();
-
-        *recursive_func = std::make_unique<std::function<void(const boost::system::error_code& ec)>>(
-            [this, recursive_func, duration, function = std::forward<Function>(function), timer](const boost::system::error_code& ec)
-        {
-            if (ec)return;
-
-            if (function())
-            {
-                timer->expires_from_now(duration);
-                timer->async_wait(**recursive_func);
-            }
-        });
-
-        timer->async_wait(**recursive_func);
-
-        return  timer;
+        return SetTimerWithoutStrand(duration, std::move(function), nullptr);
     }
 
     template<class Rep, class Period, class F, class... Args>
@@ -180,6 +143,72 @@ public:
     {
         auto func = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
         return AddTimerWithoutStrand(duration, std::move(func));
+    }
+
+    std::size_t CancelTimer(const std::weak_ptr<boost::asio::steady_timer>& weak_timer)
+    {
+        auto timer = weak_timer.lock();
+        if (timer)
+        {
+            boost::system::error_code ec;
+            auto cancel_count = timer->cancel(ec);
+            return cancel_count;
+        }
+
+        return 0;
+    }
+protected:
+    template<class Rep, class Period, typename Function>
+    std::weak_ptr<boost::asio::steady_timer> SetTimer(std::chrono::duration<Rep, Period>  duration, Function&& function, std::shared_ptr<boost::asio::steady_timer> timer = nullptr)
+    {
+        if (timer == nullptr)
+        {
+            timer = std::make_shared<boost::asio::steady_timer>(ios_, duration);
+        }
+        else
+        {
+            timer->expires_from_now(duration);
+        }
+
+        timer->async_wait(strand_.wrap([this, duration, function = std::forward<Function>(function), timer](const boost::system::error_code& ec)
+        {
+            if (ec)return;
+
+            if (function())
+            {
+                SetTimer(duration, std::move(function), timer);
+            }
+
+        }));
+
+        return  timer;
+    }
+
+
+    template<class Rep, class Period, typename Function>
+    std::weak_ptr<boost::asio::steady_timer> SetTimerWithoutStrand(std::chrono::duration<Rep, Period>  duration, Function&& function, std::shared_ptr<boost::asio::steady_timer> timer = nullptr)
+    {
+        if (timer == nullptr)
+        {
+            timer = std::make_shared<boost::asio::steady_timer>(ios_, duration);
+        }
+        else
+        {
+            timer->expires_from_now(duration);
+        }
+
+        timer->async_wait([this, duration, function = std::forward<Function>(function), timer](const boost::system::error_code& ec)
+        {
+            if (ec)return;
+
+            if (function())
+            {
+                SetTimerWithoutStrand(duration, std::move(function), timer);
+            }
+
+        });
+
+        return  timer;
     }
 
 protected:
